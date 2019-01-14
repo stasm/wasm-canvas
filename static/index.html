@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf8">
+        <title>wasm-canvas</title>
+    </head>
+    <body>
+        <canvas id="canvas" width="400" height="400"></canvas>
+
+        <script src="release.js"></script>
+        <script>
+            let canvas = document.querySelector("#canvas");
+            let ctx = canvas.getContext("2d");
+
+            let inputs = {
+                ArrowUp: false,
+                ArrowRight: false,
+                ArrowDown: false,
+                ArrowLeft: false,
+            };
+
+            function toggle_key({key}) {
+                if (key in inputs) {
+                    inputs[key] = !inputs[key];
+                }
+            }
+
+            window.addEventListener("keydown", toggle_key);
+            window.addEventListener("keyup", toggle_key);
+
+            wasm_bindgen("./release_bg.wasm").then(() => {
+                let game = new wasm_bindgen.Game(canvas, ctx);
+                requestAnimationFrame(update);
+
+                function update() {
+                    game.tick(...Object.values(inputs));
+                    requestAnimationFrame(update);
+                }
+            });
+        </script>
+    </body>
+</html>
